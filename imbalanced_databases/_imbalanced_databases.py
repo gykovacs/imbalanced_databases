@@ -7,133 +7,134 @@ Created on Sat May 19 00:00:09 2018
 """
 
 __all__= ['load_ada',
-          'load_cm1',
-          'load_german',
-          'load_glass',
-          'load_hepatitis',
-          'load_hiva',
-          'load_hypothyroid',
-          'load_kc1',
-          'load_pc1',
-          'load_satimage',
-          'load_spectf',
-          'load_sylva',
-          'load_vehicle',
-          'load_abalone_17_vs_7_8_9_10',
-            'load_abalone_19_vs_10_11_12_13',
-            'load_abalone_20_vs_8_9_10',
-            'load_abalone_21_vs_8',
-            'load_abalone_3_vs_11',
-            'load_abalone19',
-            'load_abalone9_18',
-            'load_car_good',
-            'load_car_vgood',
-            'load_cleveland_0_vs_4',
-            'load_dermatology_6',
-            'load_ecoli_0_1_3_7_vs_2_6',
-            'load_ecoli_0_1_4_6_vs_5',
-            'load_ecoli_0_1_4_7_vs_2_3_5_6',
-            'load_ecoli_0_1_4_7_vs_5_6',
-            'load_ecoli_0_1_vs_2_3_5',
-            'load_ecoli_0_1_vs_5',
-            'load_ecoli_0_2_3_4_vs_5',
-            'load_ecoli_0_2_6_7_vs_3_5',
-            'load_ecoli_0_3_4_6_vs_5',
-            'load_ecoli_0_3_4_7_vs_5_6',
-            'load_ecoli_0_3_4_vs_5',
-            'load_ecoli_0_4_6_vs_5',
-            'load_ecoli_0_6_7_vs_3_5',
-            'load_ecoli_0_6_7_vs_5',
-            'load_ecoli4',
-            'load_flaref',
-            'load_glass_0_1_4_6_vs_2',
-            'load_glass_0_1_5_vs_2',
-            'load_glass_0_1_6_vs_2',
-            'load_glass_0_1_6_vs_5',
-            'load_glass_0_4_vs_5',
-            'load_glass_0_6_vs_5',
-            'load_glass2',
-            'load_glass4',
-            'load_glass5',
-            'load_kddcup_buffer_overflow_vs_back',
-            'load_kddcup_guess_passwd_vs_satan',
-            'load_kddcup_land_vs_portsweep',
-            'load_kddcup_land_vs_satan',
-            'load_kddcup_rootkit_imap_vs_back',
-            'load_kr_vs_k_one_vs_fifteen',
-            'load_kr_vs_k_three_vs_eleven',
-            'load_kr_vs_k_zero_one_vs_draw',
-            'load_kr_vs_k_zero_vs_eight',
-            'load_kr_vs_k_zero_vs_fifteen',
-            'load_led7digit_0_2_4_5_6_7_8_9_vs_1',
-            'load_lymphography_normal_fibrosis',
-            'load_page_blocks_1_3_vs_4',
-            'load_poker_8_9_vs_5',
-            'load_poker_8_9_vs_6',
-            'load_poker_8_vs_6',
-            'load_poker_9_vs_7',
-            'load_shuttle_2_vs_5',
-            'load_shuttle_6_vs_2_3',
-            'load_shuttle_c0_vs_c4',
-            'load_shuttle_c2_vs_c4',
-            'load_vowel0',
-            'load_winequality_red_3_vs_5',
-            'load_winequality_red_4',
-            'load_winequality_red_8_vs_6',
-            'load_winequality_red_8_vs_6_7',
-            'load_winequality_white_3_9_vs_5',
-            'load_winequality_white_3_vs_7',
-            'load_winequality_white_9_vs_4',
-            'load_yeast_0_2_5_6_vs_3_7_8_9',
-            'load_yeast_0_2_5_7_9_vs_3_6_8',
-            'load_yeast_0_3_5_9_vs_7_8',
-            'load_yeast_0_5_6_7_9_vs_4',
-            'load_yeast_1_2_8_9_vs_7',
-            'load_yeast_1_4_5_8_vs_7',
-            'load_yeast_1_vs_7',
-            'load_yeast_2_vs_4',
-            'load_yeast_2_vs_8',
-            'load_yeast4',
-            'load_yeast5',
-            'load_yeast6',
-            'load_zoo_3',
-            'load_ecoli_0_vs_1',
-            'load_ecoli1',
-            'load_ecoli2',
-            'load_ecoli3',
-            'load_glass_0_1_2_3_vs_4_5_6',
-            'load_glass0',
-            'load_glass1',
-            'load_glass6',
-            'load_haberman',
-            'load_iris0',
-            'load_new_thyroid1',
-            'load_new_thyroid2',
-            'load_page_blocks0',
-            'load_pima',
-            'load_segment0',
-            'load_vehicle0',
-            'load_vehicle1',
-            'load_vehicle2',
-            'load_vehicle3',
-            'load_wisconsin',
-            'load_yeast1',
-            'load_yeast3',
-          'summary',
-          'get_all_data_loaders',
-          'get_small_set_of_data_loaders']
+'load_cm1',
+'load_german',
+'load_glass',
+'load_hepatitis',
+'load_hiva',
+'load_hypothyroid',
+'load_kc1',
+'load_pc1',
+'load_satimage',
+'load_spectf',
+'load_sylva',
+'load_vehicle',
+'load_abalone_17_vs_7_8_9_10',
+'load_abalone_19_vs_10_11_12_13',
+'load_abalone_20_vs_8_9_10',
+'load_abalone_21_vs_8',
+'load_abalone_3_vs_11',
+'load_abalone19',
+'load_abalone9_18',
+'load_car_good',
+'load_car_vgood',
+'load_cleveland_0_vs_4',
+'load_dermatology_6',
+'load_ecoli_0_1_3_7_vs_2_6',
+'load_ecoli_0_1_4_6_vs_5',
+'load_ecoli_0_1_4_7_vs_2_3_5_6',
+'load_ecoli_0_1_4_7_vs_5_6',
+'load_ecoli_0_1_vs_2_3_5',
+'load_ecoli_0_1_vs_5',
+'load_ecoli_0_2_3_4_vs_5',
+'load_ecoli_0_2_6_7_vs_3_5',
+'load_ecoli_0_3_4_6_vs_5',
+'load_ecoli_0_3_4_7_vs_5_6',
+'load_ecoli_0_3_4_vs_5',
+'load_ecoli_0_4_6_vs_5',
+'load_ecoli_0_6_7_vs_3_5',
+'load_ecoli_0_6_7_vs_5',
+'load_ecoli4',
+'load_flaref',
+'load_glass_0_1_4_6_vs_2',
+'load_glass_0_1_5_vs_2',
+'load_glass_0_1_6_vs_2',
+'load_glass_0_1_6_vs_5',
+'load_glass_0_4_vs_5',
+'load_glass_0_6_vs_5',
+'load_glass2',
+'load_glass4',
+'load_glass5',
+'load_kddcup_buffer_overflow_vs_back',
+'load_kddcup_guess_passwd_vs_satan',
+'load_kddcup_land_vs_portsweep',
+'load_kddcup_land_vs_satan',
+'load_kddcup_rootkit_imap_vs_back',
+'load_kr_vs_k_one_vs_fifteen',
+'load_kr_vs_k_three_vs_eleven',
+'load_kr_vs_k_zero_one_vs_draw',
+'load_kr_vs_k_zero_vs_eight',
+'load_kr_vs_k_zero_vs_fifteen',
+'load_led7digit_0_2_4_5_6_7_8_9_vs_1',
+'load_lymphography_normal_fibrosis',
+'load_page_blocks_1_3_vs_4',
+'load_poker_8_9_vs_5',
+'load_poker_8_9_vs_6',
+'load_poker_8_vs_6',
+'load_poker_9_vs_7',
+'load_shuttle_2_vs_5',
+'load_shuttle_6_vs_2_3',
+'load_shuttle_c0_vs_c4',
+'load_shuttle_c2_vs_c4',
+'load_vowel0',
+'load_winequality_red_3_vs_5',
+'load_winequality_red_4',
+'load_winequality_red_8_vs_6',
+'load_winequality_red_8_vs_6_7',
+'load_winequality_white_3_9_vs_5',
+'load_winequality_white_3_vs_7',
+'load_winequality_white_9_vs_4',
+'load_yeast_0_2_5_6_vs_3_7_8_9',
+'load_yeast_0_2_5_7_9_vs_3_6_8',
+'load_yeast_0_3_5_9_vs_7_8',
+'load_yeast_0_5_6_7_9_vs_4',
+'load_yeast_1_2_8_9_vs_7',
+'load_yeast_1_4_5_8_vs_7',
+'load_yeast_1_vs_7',
+'load_yeast_2_vs_4',
+'load_yeast_2_vs_8',
+'load_yeast4',
+'load_yeast5',
+'load_yeast6',
+'load_zoo_3',
+'load_ecoli_0_vs_1',
+'load_ecoli1',
+'load_ecoli2',
+'load_ecoli3',
+'load_glass_0_1_2_3_vs_4_5_6',
+'load_glass0',
+'load_glass1',
+'load_glass6',
+'load_haberman',
+'load_iris0',
+'load_new_thyroid1',
+'load_new_thyroid2',
+'load_page_blocks0',
+'load_pima',
+'load_segment0',
+'load_vehicle0',
+'load_vehicle1',
+'load_vehicle2',
+'load_vehicle3',
+'load_wisconsin',
+'load_yeast1',
+'load_yeast3',
+'summary',
+'get_all_data_loaders',
+'get_filtered_data_loaders']
 
 import copy
 import sys
 import pkgutil
 import io
 
+# for the representation of the data
 import numpy as np
 import pandas as pd
 
+# for the encoding of the data
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from scipy.io import arff
-
 
 def encode_column_onehot(column):
     lencoder= LabelEncoder().fit(column)
@@ -1256,39 +1257,65 @@ def load_yeast3(return_X_y= False, encode= True, verbose= False):
     
     return construct_return_set(db, "yeast3", return_X_y, encode, verbose= verbose)
 
+def generate_artificial_data(dim, n, imbalanced_ratio):
+    np.random.seed(2)
+    
+    center_majority= np.repeat(0.0, dim)
+    center_minority= np.repeat(1.0, dim)
+    stdev= np.linalg.norm(center_minority)/3.0
+    n_maj= int(n*imbalanced_ratio/(imbalanced_ratio - 1.0))
+    n_min= n - n_maj
+    
+    X_maj= center_majority + np.random.normal(scale= stdev, size= (n_maj, dim))
+    X_min= center_minority + np.random.normal(scale= stdev, size= (n_min, dim))
+    
+    return np.vstack([X_maj, X_min]), np.hstack([np.repeat(0, n_min), np.repeat(1, n_maj)])
+
+def load_artificial_data(dim, n, imbalanced_ratio, return_X_y= False, verbose= False):
+    X, y= generate_artificial_data(dim, n, imbalanced_ratio)
+    db= pd.DataFrame(X)
+    db['target']= y
+    return construct_return_set(db, "artificial_dim_%d_n_%d_ir_%f" % (dim, n, imbalanced_ratio), return_X_y, encode= False, verbose= verbose)
+
 def summary():
     results= []
     # fixing the globals dictionary keys
     d= list(globals().keys())
     for func_name in d:
-        if func_name.startswith('load_'):
+        if func_name.startswith('load_') and not func_name.startswith('load_artificial'):
             data_not_encoded= globals()[func_name](return_X_y= False, encode= False)
-            data_encoded= globals()[func_name](return_X_y= True, encode= True)
+            data_encoded= globals()[func_name](return_X_y= False, encode= True)
+            
+            results.append({'loader_function': globals()[func_name],
+                            'name': data_not_encoded['DESCR'],
+                            'len': len(data_not_encoded['data']),
+                            'non_encoded_n_attr': len(data_not_encoded['data'][0]),
+                            'encoded_n_attr': len(data_encoded['data'][0]),
+                            'imbalanced_ratio': np.sum(data_encoded['target'] == 0)/np.sum(data_encoded['target'] == 1)})
+    
+    df_results= pd.DataFrame(results)
+    print(df_results)
 
-            results.append([globals()[func_name], \
-                        "%s len: %d num_features_raw: %d num_features_encoded: %d" %\
-                        (data_not_encoded['DESCR'], len(data_not_encoded['data']), 
-                        len(data_not_encoded['data'][0]), len(data_encoded[0][0]))])
-    return results
+    return df_results
 
 def get_all_data_loaders():
     results= []
     # fixing the globals dictionary keys
     d= list(globals().keys())
-    
-    for func_name in d:
-        results.append(globals()[func_name])
+    results= [globals()[f] for f in d if f.startswith('load_') and not f.startswith('load_artificial')]
         
     return results
 
-def get_small_set_of_data_loaders():
-    return [load_glass,
-            load_pc1,
-            load_satimage,
-            load_vehicle,
-            load_yeast6,
-            load_yeast_1_4_5_8_vs_7,
-            load_winequality_red_4,
-            load_abalone_21_vs_8,
-            load_car_vgood,
-            load_kddcup_rootkit_imap_vs_back]
+def get_filtered_data_loaders(num_features_lower_bound= 1,
+                              num_features_upper_bound= 1e10,
+                              len_lower_bound= 2,
+                              len_upper_bound= 1e10,
+                              imbalanced_ratio_lower_bound= 0,
+                              imbalanced_ratio_upper_bound= 1e10):
+    descriptors= summary()
+    return descriptors[(descriptors['len'] >= len_lower_bound) & 
+                       (descriptors['len'] < len_upper_bound) & 
+                       (descriptors['encoded_n_attr'] >= num_features_lower_bound) & 
+                       (descriptors['encoded_n_attr'] < num_features_upper_bound) & 
+                       (descriptors['imbalanced_ratio'] >= imbalanced_ratio_lower_bound) & 
+                       (descriptors['imbalanced_ratio'] < imbalanced_ratio_upper_bound)]['loader_function'].values
