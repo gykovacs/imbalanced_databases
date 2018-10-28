@@ -136,6 +136,8 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from scipy.io import arff
 
+from statistics import mode
+
 def encode_column_onehot(column):
     lencoder= LabelEncoder().fit(column)
     lencoded= lencoder.transform(column)
@@ -151,11 +153,12 @@ def encode_column_label(column):
 def encode_column_median(column, missing_values):
     column= copy.deepcopy(column)
     if np.sum(column.isin(missing_values)) > 0:
-        column[column.isin(missing_values)]= np.median(column[~column.isin(missing_values)].astype(float))
+        #column[column.isin(missing_values)]= np.median(column[~column.isin(missing_values)].astype(float))
+        column[column.isin(missing_values)]= mode(column[~column.isin(missing_values)].astype(float))
     column= column.astype(float)
     return column.values
 
-def encode_features(data, target= 'target', encoding_threshold= 4, missing_values= ['?', None, 'None'], verbose= True):
+def encode_features(data, target= 'target', encoding_threshold= 5, missing_values= ['?', None, 'None'], verbose= True):
     columns= []
     column_names= []
     
@@ -215,7 +218,7 @@ def encode_features(data, target= 'target', encoding_threshold= 4, missing_value
     
     return pd.DataFrame(np.vstack(columns).T, columns= column_names)
 
-def construct_return_set(database, descriptor, return_X_y, encode, encoding_threshold= 4, verbose= True):
+def construct_return_set(database, descriptor, return_X_y, encode, encoding_threshold= 5, citation= None, verbose= True):
     if return_X_y == True and encode == False:
         return database.drop('target', axis= 'columns').values, database['target'].values
     
@@ -230,6 +233,7 @@ def construct_return_set(database, descriptor, return_X_y, encode, encoding_thre
     descriptors['data']= features.values
     descriptors['feature_names']= list(features.columns)
     descriptors['target']= database['target'].values
+    descriptors['citation']= citation
     
     return descriptors
 
@@ -243,19 +247,39 @@ def read_arff_data(filename, sep= ',', usecols= None):
         from cStringIO import StringIO
         return arff.loadarff(StringIO(unicode(str(pkgutil.get_data('rare_databases', filename)).decode('string_escape'), "utf-8")))
 
+citations= {'krnn': """@article{krnn,
+  author={X. J. Zhang and Z. Tari and M. Cheriet},
+  title={{KRNN}: k {Rare-class Nearest Neighbor} classification},
+  journal={Pattern Recognition},
+  year={2017},
+  volume={62},
+  number={2},
+  pages={33--44}
+}""",
+'keel':"""@article{keel,
+author={Alcala-Fdez, J. and Fernandez, A. and Luengo, J. and Derrac, J. and Garcia, S. and Sanchez, L. and Herrera, F.},
+title={KEEL Data-Mining Software Tool: Data Set Repository, Integration of Algorithms and Experimental Analysis Framework},
+journal={Journal of Multiple-Valued Logic and Soft Computing},
+volume={17},
+number={2-3},
+year={2011},
+pages={255-287}
+}
+"""}
+
 def load_hiva(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/hiva/hiva_train.data', sep= ' ')
     del db[db.columns[-1]]
     target= read_csv_data('data/hiva/hiva_train.labels')
     db['target']= target
     
-    return construct_return_set(db, "HIVA", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "HIVA", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_hypothyroid(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/hypothyroid/hypothyroid.data.txt')
     db.columns= ['target'] + list(db.columns[1:])
     
-    return construct_return_set(db, "hypothyroid dataset", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "hypothyroid", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_sylva(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/sylva/sylva_train.data', sep= ' ')
@@ -263,7 +287,7 @@ def load_sylva(return_X_y= False, encode= True, verbose= False):
     target= read_csv_data('data/sylva/sylva_train.labels')
     db['target']= target
     
-    return construct_return_set(db, "sylva", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "sylva", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_pc1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/pc1/pc1.arff')
@@ -272,7 +296,7 @@ def load_pc1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['defects'] == b'true', 'defects']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "PC1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "PC1", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_cm1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/cm1/cm1.arff.txt')
@@ -281,7 +305,7 @@ def load_cm1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['defects'] == b'true', 'defects']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "CM1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "CM1", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_kc1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kc1/kc1.arff.txt')
@@ -290,7 +314,7 @@ def load_kc1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['defects'] == b'true', 'defects']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "KC1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "KC1", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_spectf(return_X_y= False, encode= True, verbose= False):
     db0= read_csv_data('data/spect_f/SPECTF.train.txt')
@@ -298,13 +322,13 @@ def load_spectf(return_X_y= False, encode= True, verbose= False):
     db= pd.concat([db0, db1])
     db.columns= ['target'] + list(db.columns[1:])
     
-    return construct_return_set(db, "SPECT_F", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "SPECT_F", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_hepatitis(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/hepatitis/hepatitis.data.txt')
     db.columns= ['target'] + list(db.columns[1:])
 
-    return construct_return_set(db, "hepatitis", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "hepatitis", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_vehicle(return_X_y= False, encode= True, verbose= False):
     db0= read_csv_data('data/vehicle/xaa.dat.txt', sep= ' ', usecols= range(19))
@@ -322,7 +346,7 @@ def load_vehicle(return_X_y= False, encode= True, verbose= False):
     db.columns= list(db.columns[:-1]) + ['target']
     db.loc[db['target'] != 'van', 'target']= 'other'
     
-    return construct_return_set(db, "vehicle", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "vehicle", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_ada(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/ada/ada_train.data', sep= ' ')
@@ -330,13 +354,13 @@ def load_ada(return_X_y= False, encode= True, verbose= False):
     target= read_csv_data('data/ada/ada_train.labels')
     db['target']= target
     
-    return construct_return_set(db, "ADA", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ADA", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_german(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/german/german.data.txt', sep= ' ')
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "german", return_X_y, encode, encoding_threshold= 20, verbose= verbose)
+    return construct_return_set(db, "german", return_X_y, encode, encoding_threshold= 20, citation= citations['krnn'], verbose= verbose)
 
 def load_glass(return_X_y= False, encode= True, verbose= False):
     db= read_csv_data('data/glass/glass.data.txt')
@@ -344,7 +368,7 @@ def load_glass(return_X_y= False, encode= True, verbose= False):
     db.loc[db['target'] != 3, 'target']= 0
     del db[db.columns[0]]
     
-    return construct_return_set(db, "glass", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_satimage(return_X_y= False, encode= True, verbose= False):
     db0= read_csv_data('data/satimage/sat.trn.txt', sep= ' ')
@@ -353,7 +377,7 @@ def load_satimage(return_X_y= False, encode= True, verbose= False):
     db.columns= list(db.columns[:-1]) + ['target']
     db.loc[db['target'] != 4, 'target']= 0
     
-    return construct_return_set(db, "SATIMAGE", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "SATIMAGE", return_X_y, encode, citation= citations['krnn'], verbose= verbose)
 
 def load_abalone_17_vs_7_8_9_10(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone-17_vs_7-8-9-10/abalone-17_vs_7-8-9-10.dat')
@@ -362,7 +386,7 @@ def load_abalone_17_vs_7_8_9_10(return_X_y= False, encode= True, verbose= False)
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone_17_vs_7_8_9_10", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone_17_vs_7_8_9_10", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_abalone_19_vs_10_11_12_13(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone-19_vs_10-11-12-13/abalone-19_vs_10-11-12-13.dat')
@@ -371,7 +395,7 @@ def load_abalone_19_vs_10_11_12_13(return_X_y= False, encode= True, verbose= Fal
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone-19_vs_10-11-12-13", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone-19_vs_10-11-12-13", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_abalone_20_vs_8_9_10(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone-20_vs_8-9-10/abalone-20_vs_8-9-10.dat')
@@ -380,7 +404,7 @@ def load_abalone_20_vs_8_9_10(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone-20_vs_8-9-10", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone-20_vs_8-9-10", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_abalone_21_vs_8(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone-21_vs_8/abalone-21_vs_8.dat')
@@ -389,7 +413,7 @@ def load_abalone_21_vs_8(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone-21_vs_8", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone-21_vs_8", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_abalone_3_vs_11(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone-3_vs_11/abalone-3_vs_11.dat')
@@ -398,7 +422,7 @@ def load_abalone_3_vs_11(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone-3_vs_11", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone-3_vs_11", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_abalone19(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone19/abalone19.dat')
@@ -407,7 +431,7 @@ def load_abalone19(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone19", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone19", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_abalone9_18(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/abalone9-18/abalone9-18.dat')
@@ -416,7 +440,7 @@ def load_abalone9_18(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "abalone9-18", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "abalone9-18", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_car_good(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/car-good/car-good.dat')
@@ -425,7 +449,7 @@ def load_car_good(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "car_good", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "car_good", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_car_vgood(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/car-vgood/car-vgood.dat')
@@ -434,7 +458,7 @@ def load_car_vgood(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "car-vgood", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "car-vgood", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_cleveland_0_vs_4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/cleveland-0_vs_4/cleveland-0_vs_4_no_null.dat')
@@ -443,7 +467,7 @@ def load_cleveland_0_vs_4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['num'] == b'positive', 'num']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "cleveland-0_vs_4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "cleveland-0_vs_4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_dermatology_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/dermatology-6/dermatology-6.dat')
@@ -452,7 +476,7 @@ def load_dermatology_6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "dermatology-6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "dermatology-6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_1_3_7_vs_2_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-1-3-7_vs_2-6/ecoli-0-1-3-7_vs_2-6.dat')
@@ -461,7 +485,7 @@ def load_ecoli_0_1_3_7_vs_2_6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-1-3-7_vs_2-6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-1-3-7_vs_2-6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_1_4_6_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-1-4-6_vs_5/ecoli-0-1-4-6_vs_5.dat')
@@ -470,7 +494,7 @@ def load_ecoli_0_1_4_6_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-1-4-6_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-1-4-6_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_1_4_7_vs_2_3_5_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-1-4-7_vs_2-3-5-6/ecoli-0-1-4-7_vs_2-3-5-6.dat')
@@ -479,7 +503,7 @@ def load_ecoli_0_1_4_7_vs_2_3_5_6(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-1-4-7_vs_2-3-5-6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-1-4-7_vs_2-3-5-6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_1_4_7_vs_5_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-1-4-7_vs_5-6/ecoli-0-1-4-7_vs_5-6.dat')
@@ -488,7 +512,7 @@ def load_ecoli_0_1_4_7_vs_5_6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-1-4-7_vs_5-6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-1-4-7_vs_5-6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_1_vs_2_3_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-1_vs_2-3-5/ecoli-0-1_vs_2-3-5.dat')
@@ -497,7 +521,7 @@ def load_ecoli_0_1_vs_2_3_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-1_vs_2-3-5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-1_vs_2-3-5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_1_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-1_vs_5/ecoli-0-1_vs_5.dat')
@@ -506,7 +530,7 @@ def load_ecoli_0_1_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-1_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-1_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_2_3_4_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-2-3-4_vs_5/ecoli-0-2-3-4_vs_5.dat')
@@ -515,7 +539,7 @@ def load_ecoli_0_2_3_4_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-2-3-4_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-2-3-4_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_2_6_7_vs_3_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-2-6-7_vs_3-5/ecoli-0-2-6-7_vs_3-5.dat')
@@ -524,7 +548,7 @@ def load_ecoli_0_2_6_7_vs_3_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-2-6-7_vs_3-5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-2-6-7_vs_3-5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_3_4_6_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-3-4-6_vs_5/ecoli-0-3-4-6_vs_5.dat')
@@ -533,7 +557,7 @@ def load_ecoli_0_3_4_6_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-3-4-6_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-3-4-6_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_3_4_7_vs_5_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-3-4-7_vs_5-6/ecoli-0-3-4-7_vs_5-6.dat')
@@ -542,7 +566,7 @@ def load_ecoli_0_3_4_7_vs_5_6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-3-4-7_vs_5-6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-3-4-7_vs_5-6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_3_4_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-3-4_vs_5/ecoli-0-3-4_vs_5.dat')
@@ -551,7 +575,7 @@ def load_ecoli_0_3_4_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-3-4_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-3-4_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_4_6_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-4-6_vs_5/ecoli-0-4-6_vs_5.dat')
@@ -560,7 +584,7 @@ def load_ecoli_0_4_6_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-4-6_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-4-6_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_6_7_vs_3_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-6-7_vs_3-5/ecoli-0-6-7_vs_3-5.dat')
@@ -569,7 +593,7 @@ def load_ecoli_0_6_7_vs_3_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-6-7_vs_3-5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-6-7_vs_3-5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli_0_6_7_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli-0-6-7_vs_5/ecoli-0-6-7_vs_5.dat')
@@ -578,7 +602,7 @@ def load_ecoli_0_6_7_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0-6-7_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0-6-7_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli4/ecoli4.dat')
@@ -587,7 +611,7 @@ def load_ecoli4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_flaref(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/flare-F/flare-F.dat')
@@ -596,7 +620,7 @@ def load_flaref(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "flare-F", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "flare-F", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_1_4_6_vs_2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-1-4-6_vs_2/glass-0-1-4-6_vs_2.dat')
@@ -605,7 +629,7 @@ def load_glass_0_1_4_6_vs_2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['typeGlass'] == b'positive', 'typeGlass']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-1-4-6_vs_2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-1-4-6_vs_2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_1_5_vs_2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-1-5_vs_2/glass-0-1-5_vs_2.dat')
@@ -614,7 +638,7 @@ def load_glass_0_1_5_vs_2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['typeGlass'] == b'positive', 'typeGlass']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-1-5_vs_2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-1-5_vs_2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_1_6_vs_2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-1-6_vs_2/glass-0-1-6_vs_2.dat')
@@ -623,7 +647,7 @@ def load_glass_0_1_6_vs_2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-1-6_vs_2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-1-6_vs_2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_1_6_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-1-6_vs_5/glass-0-1-6_vs_5.dat')
@@ -632,7 +656,7 @@ def load_glass_0_1_6_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-1-6_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-1-6_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_4_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-4_vs_5/glass-0-4_vs_5.dat')
@@ -641,7 +665,7 @@ def load_glass_0_4_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['typeGlass'] == b'positive', 'typeGlass']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-4_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-4_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_6_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-6_vs_5/glass-0-6_vs_5.dat')
@@ -650,7 +674,7 @@ def load_glass_0_6_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['typeGlass'] == b'positive', 'typeGlass']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-6_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-6_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass2/glass2.dat')
@@ -659,7 +683,7 @@ def load_glass2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass4/glass4.dat')
@@ -668,7 +692,7 @@ def load_glass4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass5/glass5.dat')
@@ -677,7 +701,7 @@ def load_glass5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kddcup_buffer_overflow_vs_back(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kddcup-buffer_overflow_vs_back/kddcup-buffer_overflow_vs_back.dat')
@@ -686,7 +710,7 @@ def load_kddcup_buffer_overflow_vs_back(return_X_y= False, encode= True, verbose
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kddcup-buffer_overflow_vs_back", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kddcup-buffer_overflow_vs_back", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kddcup_guess_passwd_vs_satan(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kddcup-guess_passwd_vs_satan/kddcup-guess_passwd_vs_satan.dat')
@@ -695,7 +719,7 @@ def load_kddcup_guess_passwd_vs_satan(return_X_y= False, encode= True, verbose= 
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kddcup-guess_passwd_vs_satan", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kddcup-guess_passwd_vs_satan", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kddcup_land_vs_portsweep(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kddcup-land_vs_portsweep/kddcup-land_vs_portsweep.dat')
@@ -704,7 +728,7 @@ def load_kddcup_land_vs_portsweep(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kddcup-land_vs_portsweep", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kddcup-land_vs_portsweep", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kddcup_land_vs_satan(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kddcup-land_vs_satan/kddcup-land_vs_satan.dat')
@@ -713,7 +737,7 @@ def load_kddcup_land_vs_satan(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kddcup-land_vs_satan", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kddcup-land_vs_satan", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kddcup_rootkit_imap_vs_back(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kddcup-rootkit-imap_vs_back/kddcup-rootkit-imap_vs_back.dat')
@@ -722,7 +746,7 @@ def load_kddcup_rootkit_imap_vs_back(return_X_y= False, encode= True, verbose= F
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kddcup-rootkit-imap_vs_back", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kddcup-rootkit-imap_vs_back", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kr_vs_k_one_vs_fifteen(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kr-vs-k-one_vs_fifteen/kr-vs-k-one_vs_fifteen.dat')
@@ -731,7 +755,7 @@ def load_kr_vs_k_one_vs_fifteen(return_X_y= False, encode= True, verbose= False)
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kr-vs-k-one_vs_fifteen", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kr-vs-k-one_vs_fifteen", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kr_vs_k_three_vs_eleven(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kr-vs-k-three_vs_eleven/kr-vs-k-three_vs_eleven.dat')
@@ -740,7 +764,7 @@ def load_kr_vs_k_three_vs_eleven(return_X_y= False, encode= True, verbose= False
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kr-vs-k-three_vs_eleven", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kr-vs-k-three_vs_eleven", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kr_vs_k_zero_one_vs_draw(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kr-vs-k-zero-one_vs_draw/kr-vs-k-zero-one_vs_draw.dat')
@@ -749,7 +773,7 @@ def load_kr_vs_k_zero_one_vs_draw(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kr-vs-k-zero-one_vs_draw", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kr-vs-k-zero-one_vs_draw", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kr_vs_k_zero_vs_eight(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kr-vs-k-zero_vs_eight/kr-vs-k-zero_vs_eight.dat')
@@ -758,7 +782,7 @@ def load_kr_vs_k_zero_vs_eight(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kr-vs-k-zero_vs_eight", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kr-vs-k-zero_vs_eight", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_kr_vs_k_zero_vs_fifteen(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/kr-vs-k-zero_vs_fifteen/kr-vs-k-zero_vs_fifteen.dat')
@@ -767,7 +791,7 @@ def load_kr_vs_k_zero_vs_fifteen(return_X_y= False, encode= True, verbose= False
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "kr-vs-k-zero_vs_fifteen", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "kr-vs-k-zero_vs_fifteen", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_led7digit_0_2_4_5_6_7_8_9_vs_1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/led7digit-0-2-4-5-6-7-8-9_vs_1/led7digit-0-2-4-5-6-7-8-9_vs_1.dat')
@@ -776,7 +800,7 @@ def load_led7digit_0_2_4_5_6_7_8_9_vs_1(return_X_y= False, encode= True, verbose
     db.loc[db['number'] == b'positive', 'number']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "led7digit-0-2-4-6-7-8-9_vs_1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "led7digit-0-2-4-6-7-8-9_vs_1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_lymphography_normal_fibrosis(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/lymphography-normal-fibrosis/lymphography-normal-fibrosis.dat')
@@ -785,7 +809,7 @@ def load_lymphography_normal_fibrosis(return_X_y= False, encode= True, verbose= 
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "lymphography-normal-fibrosis", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "lymphography-normal-fibrosis", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_page_blocks_1_3_vs_4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/page-blocks-1-3_vs_4/page-blocks-1-3_vs_4.dat')
@@ -794,7 +818,7 @@ def load_page_blocks_1_3_vs_4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "page-blocks-1-3_vs_4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "page-blocks-1-3_vs_4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_poker_8_9_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/poker-8-9_vs_5/poker-8-9_vs_5.dat')
@@ -803,7 +827,7 @@ def load_poker_8_9_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "poker-8-9_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "poker-8-9_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_poker_8_9_vs_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/poker-8-9_vs_6/poker-8-9_vs_6.dat')
@@ -812,7 +836,7 @@ def load_poker_8_9_vs_6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "poker-8-9_vs_6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "poker-8-9_vs_6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_poker_8_vs_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/poker-8_vs_6/poker-8_vs_6.dat')
@@ -821,7 +845,7 @@ def load_poker_8_vs_6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "poker-8_vs_6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "poker-8_vs_6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_poker_9_vs_7(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/poker-9_vs_7/poker-9_vs_7.dat')
@@ -830,7 +854,7 @@ def load_poker_9_vs_7(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "poker-9_vs_7", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "poker-9_vs_7", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_shuttle_2_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/shuttle-2_vs_5/shuttle-2_vs_5.dat')
@@ -839,7 +863,7 @@ def load_shuttle_2_vs_5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "shuttle-2_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "shuttle-2_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_shuttle_6_vs_2_3(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/shuttle-6_vs_2-3/shuttle-6_vs_2-3.dat')
@@ -848,7 +872,7 @@ def load_shuttle_6_vs_2_3(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "shuttle-6_vs_2-3", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "shuttle-6_vs_2-3", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_shuttle_c0_vs_c4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/shuttle-c0-vs-c4/shuttle-c0-vs-c4.dat')
@@ -857,7 +881,7 @@ def load_shuttle_c0_vs_c4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "shuttle-c0-vs-c4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "shuttle-c0-vs-c4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_shuttle_c2_vs_c4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/shuttle-c2-vs-c4/shuttle-c2-vs-c4.dat')
@@ -866,7 +890,7 @@ def load_shuttle_c2_vs_c4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "shuttle-c2-vs-c4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "shuttle-c2-vs-c4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_vowel0(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/vowel0/vowel0.dat')
@@ -875,7 +899,7 @@ def load_vowel0(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "vowel0", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "vowel0", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_red_3_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-red-3_vs_5/winequality-red-3_vs_5.dat')
@@ -884,7 +908,7 @@ def load_winequality_red_3_vs_5(return_X_y= False, encode= True, verbose= False)
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-red-3_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-red-3_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_red_4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-red-4/winequality-red-4.dat')
@@ -893,7 +917,7 @@ def load_winequality_red_4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-red-4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-red-4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_red_8_vs_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-red-8_vs_6/winequality-red-8_vs_6.dat')
@@ -902,7 +926,7 @@ def load_winequality_red_8_vs_6(return_X_y= False, encode= True, verbose= False)
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-red-8_vs_6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-red-8_vs_6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_red_8_vs_6_7(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-red-8_vs_6-7/winequality-red-8_vs_6-7.dat')
@@ -911,7 +935,7 @@ def load_winequality_red_8_vs_6_7(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-red-8_vs_6-7", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-red-8_vs_6-7", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_white_3_9_vs_5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-white-3-9_vs_5/winequality-white-3-9_vs_5.dat')
@@ -920,7 +944,7 @@ def load_winequality_white_3_9_vs_5(return_X_y= False, encode= True, verbose= Fa
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-white-3-9_vs_5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-white-3-9_vs_5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_white_3_vs_7(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-white-3_vs_7/winequality-white-3_vs_7.dat')
@@ -929,7 +953,7 @@ def load_winequality_white_3_vs_7(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-white-3_vs_7", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-white-3_vs_7", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_winequality_white_9_vs_4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/winequality-white-9_vs_4/winequality-white-9_vs_4.dat')
@@ -938,7 +962,7 @@ def load_winequality_white_9_vs_4(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "winequality-white-9_vs_4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "winequality-white-9_vs_4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_0_2_5_6_vs_3_7_8_9(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-0-2-5-6_vs_3-7-8-9/yeast-0-2-5-6_vs_3-7-8-9.dat')
@@ -947,7 +971,7 @@ def load_yeast_0_2_5_6_vs_3_7_8_9(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-0-2-5-6_vs_3-7-8-9", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-0-2-5-6_vs_3-7-8-9", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_0_2_5_7_9_vs_3_6_8(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-0-2-5-7-9_vs_3-6-8/yeast-0-2-5-7-9_vs_3-6-8.dat')
@@ -956,7 +980,7 @@ def load_yeast_0_2_5_7_9_vs_3_6_8(return_X_y= False, encode= True, verbose= Fals
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-0-2-5-7-9_vs_3-6-8", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-0-2-5-7-9_vs_3-6-8", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_0_3_5_9_vs_7_8(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-0-3-5-9_vs_7-8/yeast-0-3-5-9_vs_7-8.dat')
@@ -965,7 +989,7 @@ def load_yeast_0_3_5_9_vs_7_8(return_X_y= False, encode= True, verbose= False):
     db.loc[db['class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-0-3-5-9_vs_7-8", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-0-3-5-9_vs_7-8", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_0_5_6_7_9_vs_4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-0-5-6-7-9_vs_4/yeast-0-5-6-7-9_vs_4.dat')
@@ -974,7 +998,7 @@ def load_yeast_0_5_6_7_9_vs_4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-0-5-6-7-9_vs_4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-0-5-6-7-9_vs_4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_1_2_8_9_vs_7(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-1-2-8-9_vs_7/yeast-1-2-8-9_vs_7.dat')
@@ -983,7 +1007,7 @@ def load_yeast_1_2_8_9_vs_7(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-1-2-8-9_vs_7", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-1-2-8-9_vs_7", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_1_4_5_8_vs_7(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-1-4-5-8_vs_7/yeast-1-4-5-8_vs_7.dat')
@@ -992,7 +1016,7 @@ def load_yeast_1_4_5_8_vs_7(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-1-4-5-8_vs_7", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-1-4-5-8_vs_7", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_1_vs_7(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-1_vs_7/yeast-1_vs_7.dat')
@@ -1001,7 +1025,7 @@ def load_yeast_1_vs_7(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-1_vs_7", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-1_vs_7", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_2_vs_4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-2_vs_4/yeast-2_vs_4.dat')
@@ -1010,7 +1034,7 @@ def load_yeast_2_vs_4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-2_vs_4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-2_vs_4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast_2_vs_8(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast-2_vs_8/yeast-2_vs_8.dat')
@@ -1019,7 +1043,7 @@ def load_yeast_2_vs_8(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast-2_vs_8", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast-2_vs_8", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast4(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast4/yeast4.dat')
@@ -1028,7 +1052,7 @@ def load_yeast4(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast4", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast4", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast5(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast5/yeast5.dat')
@@ -1037,7 +1061,7 @@ def load_yeast5(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast5", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast5", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast6/yeast6.dat')
@@ -1046,7 +1070,7 @@ def load_yeast6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_zoo_3(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/zoo-3/zoo-3.dat')
@@ -1055,7 +1079,7 @@ def load_zoo_3(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "zoo-3", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "zoo-3", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 #########################
 
@@ -1066,7 +1090,7 @@ def load_ecoli_0_vs_1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli-0_vs_1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli-0_vs_1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli1/ecoli1.dat')
@@ -1075,7 +1099,7 @@ def load_ecoli1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli2/ecoli2.dat')
@@ -1084,7 +1108,7 @@ def load_ecoli2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_ecoli3(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/ecoli3/ecoli3.dat')
@@ -1093,7 +1117,7 @@ def load_ecoli3(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "ecoli3", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "ecoli3", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass_0_1_2_3_vs_4_5_6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass-0-1-2-3_vs_4-5-6/glass-0-1-2-3_vs_4-5-6.dat')
@@ -1102,7 +1126,7 @@ def load_glass_0_1_2_3_vs_4_5_6(return_X_y= False, encode= True, verbose= False)
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass-0-1-2-3_vs_4-5-6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass-0-1-2-3_vs_4-5-6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass0(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass0/glass0.dat')
@@ -1111,7 +1135,7 @@ def load_glass0(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass0", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass0", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass1/glass1.dat')
@@ -1120,7 +1144,7 @@ def load_glass1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_glass6(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/glass6/glass6.dat')
@@ -1129,7 +1153,7 @@ def load_glass6(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "glass6", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "glass6", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_haberman(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/haberman/haberman.dat')
@@ -1138,7 +1162,7 @@ def load_haberman(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "habarman", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "habarman", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_iris0(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/iris0/iris0.dat')
@@ -1147,7 +1171,7 @@ def load_iris0(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "iris0", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "iris0", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_new_thyroid1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/new_thyroid1/new-thyroid1.dat')
@@ -1156,7 +1180,7 @@ def load_new_thyroid1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "new_thyroid1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "new_thyroid1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_new_thyroid2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/new_thyroid2/new_thyroid2.dat')
@@ -1165,7 +1189,7 @@ def load_new_thyroid2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "new_thyroid2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "new_thyroid2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_page_blocks0(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/page-blocks0/page-blocks0.dat')
@@ -1174,7 +1198,7 @@ def load_page_blocks0(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "page_blocks0", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "page_blocks0", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_pima(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/pima/pima.dat')
@@ -1183,7 +1207,7 @@ def load_pima(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "pima", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "pima", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_segment0(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/segment0/segment0.dat')
@@ -1192,7 +1216,7 @@ def load_segment0(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "segment0", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "segment0", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_vehicle0(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/vehicle0/vehicle0.dat')
@@ -1201,7 +1225,7 @@ def load_vehicle0(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "vehicle0", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "vehicle0", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_vehicle1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/vehicle1/vehicle1.dat')
@@ -1210,7 +1234,7 @@ def load_vehicle1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "vehicle1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "vehicle1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_vehicle2(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/vehicle2/vehicle2.dat')
@@ -1219,7 +1243,7 @@ def load_vehicle2(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "vehicle2", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "vehicle2", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_vehicle3(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/vehicle3/vehicle3.dat')
@@ -1228,7 +1252,7 @@ def load_vehicle3(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "vehicle3", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "vehicle3", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_wisconsin(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/wisconsin/wisconsin.dat')
@@ -1237,7 +1261,7 @@ def load_wisconsin(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "wisconsin", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "wisconsin", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast1(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast1/yeast1.dat')
@@ -1246,7 +1270,7 @@ def load_yeast1(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast1", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast1", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def load_yeast3(return_X_y= False, encode= True, verbose= False):
     data, meta= read_arff_data('data/yeast3/yeast3.dat')
@@ -1255,7 +1279,7 @@ def load_yeast3(return_X_y= False, encode= True, verbose= False):
     db.loc[db['Class'] == b'positive', 'Class']= True
     db.columns= list(db.columns[:-1]) + ['target']
     
-    return construct_return_set(db, "yeast3", return_X_y, encode, verbose= verbose)
+    return construct_return_set(db, "yeast3", return_X_y, encode, citation= citations['keel'], verbose= verbose)
 
 def generate_artificial_data(dim, n, imbalanced_ratio):
     np.random.seed(2)
@@ -1277,24 +1301,46 @@ def load_artificial_data(dim, n, imbalanced_ratio, return_X_y= False, verbose= F
     db['target']= y
     return construct_return_set(db, "artificial_dim_%d_n_%d_ir_%f" % (dim, n, imbalanced_ratio), return_X_y, encode= False, verbose= verbose)
 
-def summary():
+def summary(include_citation= False):
     results= []
     # fixing the globals dictionary keys
-    d= list(globals().keys())
+    d= __all__
+    
     for func_name in d:
         if func_name.startswith('load_') and not func_name.startswith('load_artificial'):
             data_not_encoded= globals()[func_name](return_X_y= False, encode= False)
             data_encoded= globals()[func_name](return_X_y= False, encode= True)
             
-            results.append({'loader_function': globals()[func_name],
+            from sklearn.neighbors import NearestNeighbors
+            from sklearn.preprocessing import StandardScaler
+            nn= NearestNeighbors(n_neighbors= 2)
+            X= StandardScaler().fit_transform(data_encoded['data'])
+            
+            X_min= X[data_encoded['target'] == 1]
+            X_maj= X[data_encoded['target'] == 0]
+            
+            dist, ind= nn.fit(X_min).kneighbors(X_min)
+            mean_min_dist= np.mean(dist[:,1])
+            dist, ind= nn.fit(X_maj).kneighbors(X_maj)
+            mean_maj_dist= np.mean(dist[:,1])
+            
+            result= {'loader_function': globals()[func_name],
                             'name': data_not_encoded['DESCR'],
                             'len': len(data_not_encoded['data']),
                             'non_encoded_n_attr': len(data_not_encoded['data'][0]),
                             'encoded_n_attr': len(data_encoded['data'][0]),
-                            'imbalanced_ratio': np.sum(data_encoded['target'] == 0)/np.sum(data_encoded['target'] == 1)})
+                            'n_minority': np.sum(data_encoded['target'] == 1),
+                            'mean_min_dist': mean_min_dist,
+                            'mean_maj_dist': mean_maj_dist,
+                            'imbalance_ratio_dist': mean_maj_dist/mean_min_dist,
+                            'imbalance_ratio': np.sum(data_encoded['target'] == 0)/np.sum(data_encoded['target'] == 1)}
+            
+            if include_citation:
+                result['citation']= data_encoded['citation']
+            
+            results.append(result)
     
     df_results= pd.DataFrame(results)
-    print(df_results)
 
     return df_results
 
@@ -1307,15 +1353,15 @@ def get_all_data_loaders():
     return results
 
 def get_filtered_data_loaders(num_features_lower_bound= 1,
-                              num_features_upper_bound= 1e10,
+                              num_features_upper_bound= 50,
                               len_lower_bound= 2,
-                              len_upper_bound= 1e10,
-                              imbalanced_ratio_lower_bound= 0,
-                              imbalanced_ratio_upper_bound= 1e10):
+                              len_upper_bound= 8000,
+                              imbalance_ratio_lower_bound= 0,
+                              imbalance_ratio_upper_bound= 1e10):
     descriptors= summary()
     return descriptors[(descriptors['len'] >= len_lower_bound) & 
                        (descriptors['len'] < len_upper_bound) & 
                        (descriptors['encoded_n_attr'] >= num_features_lower_bound) & 
                        (descriptors['encoded_n_attr'] < num_features_upper_bound) & 
-                       (descriptors['imbalanced_ratio'] >= imbalanced_ratio_lower_bound) & 
-                       (descriptors['imbalanced_ratio'] < imbalanced_ratio_upper_bound)]['loader_function'].values
+                       (descriptors['imbalance_ratio'] >= imbalance_ratio_lower_bound) & 
+                       (descriptors['imbalance_ratio'] < imbalance_ratio_upper_bound)]['loader_function'].values
