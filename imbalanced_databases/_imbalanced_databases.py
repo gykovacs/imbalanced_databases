@@ -238,14 +238,14 @@ def construct_return_set(database, descriptor, return_X_y, encode, encoding_thre
     return descriptors
 
 def read_csv_data(filename, sep= ',', usecols= None):
-    return pd.read_csv(io.BytesIO(pkgutil.get_data('rare_databases', filename)), sep= sep, header= None, usecols= usecols)
+    return pd.read_csv(io.BytesIO(pkgutil.get_data('imbalanced_databases', filename)), sep= sep, header= None, usecols= usecols)
 
 def read_arff_data(filename, sep= ',', usecols= None):
     if sys.version_info >= (3,0):
-        return arff.loadarff(io.StringIO(pkgutil.get_data('rare_databases', filename).decode('unicode_escape')))
+        return arff.loadarff(io.StringIO(pkgutil.get_data('imbalanced_databases', filename).decode('unicode_escape')))
     else:
         from cStringIO import StringIO
-        return arff.loadarff(StringIO(unicode(str(pkgutil.get_data('rare_databases', filename)).decode('string_escape'), "utf-8")))
+        return arff.loadarff(StringIO(unicode(str(pkgutil.get_data('imbalanced_databases', filename)).decode('string_escape'), "utf-8")))
 
 citations= {'krnn': """@article{krnn,
   author={X. J. Zhang and Z. Tari and M. Cheriet},
