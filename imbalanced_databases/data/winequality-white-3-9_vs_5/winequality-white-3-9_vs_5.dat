@@ -10,7 +10,7 @@
 @attribute PH real[2.72,3.82]
 @attribute Sulphates real[0.22,1.08]
 @attribute Alcohol real[8.0,14.2]
-@attribute Class {positive, negative}
+@attribute Class {positive,negative}
 @data
 8.1,0.27,0.41,1.45,0.033,11.0,63.0,0.9908,2.99,0.56,12.0,negative
 8.6,0.23,0.4,4.2,0.035,17.0,109.0,0.9947,3.14,0.53,9.7,negative

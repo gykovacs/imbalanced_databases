@@ -1,4 +1,4 @@
-@relation poker-9_vs_7
+@relationpoker-9_vs_7
 @attribute S1 integer[1,4]
 @attribute C1 integer[1,13]
 @attribute S2 integer[1,4]

@@ -5,7 +5,7 @@
 @attribute Persons {2,4,more}
 @attribute Lug_boot {small,med,big}
 @attribute Safety {low,med,high}
-@attribute Class {positive, negative}
+@attribute Class {positive,negative}
 @data
 vhigh,vhigh,2,2,small,low,negative
 vhigh,vhigh,2,2,small,med,negative

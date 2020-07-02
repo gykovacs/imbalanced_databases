@@ -4,7 +4,7 @@
 @attribute Definite_borders integer[0,3]
 @attribute Itching integer[0,3]
 @attribute Koebner_phenomenon integer[0,3]
-@attribute Polygonal_papules integer[0,3]
+@attributepolygonal_papules integer[0,3]
 @attribute Follicular_papules integer[0,3]
 @attribute Oral_mucosal integer[0,3]
 @attribute Knee_and_elbow integer[0,3]

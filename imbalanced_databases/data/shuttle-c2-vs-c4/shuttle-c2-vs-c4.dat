@@ -8,7 +8,7 @@
 @attribute A7 integer [-18, 40]
 @attribute A8 integer [-353, 130]
 @attribute A9 integer [-356, 126]
-@attribute Class {positive, negative}
+@attribute Class {positive,negative}
 @data
 52,-30,79,0,0,0,27,79,52,positive
 90,-40,107,0,64,-28,17,42,26,positive

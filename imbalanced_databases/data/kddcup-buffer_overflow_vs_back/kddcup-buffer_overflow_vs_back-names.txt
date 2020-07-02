@@ -2,7 +2,7 @@ KDD Cup (Imbalanced: buffer_overflow vs back) data set
 
 1: Description.
 
-An imbalanced version of the KDD Cup data set, where the possitive examples belong to the class buffer_overflow and the negative examples belong to the class back.
+An imbalanced version of the KDD Cup data set, where thepossitive examples belong to the class buffer_overflow and the negative examples belong to the class back.
 
 2: Type.				Imbalanced
 3: Origin.				Laboratory
@@ -17,7 +17,7 @@ An imbalanced version of the KDD Cup data set, where the possitive examples belo
 @relation kddcup-buffer_overflow_vs_back
 @attribute Atr-0 real [0.0, 58329.0]
 @attribute Atr-1 {icmp, tcp, udp}
-@attribute Atr-2 {auth, bgp, courier, csnet_ns, ctf, daytime, discard, domain, domain_u, echo, eco_i, ecr_i, efs, exec, finger, ftp, ftp_data, gopher, hostnames, http, http_443, imap4, IRC, iso_tsap, klogin, kshell, ldap, link, login, mtp, name, netbios_dgm, netbios_ns, netbios_ssn, netstat, nnsp, nntp, ntp_u, other, pm_dump, pop_2, pop_3, printer, private, red_i, remote_job, rje, shell, smtp, sql_net, ssh, sunrpc, supdup, systat, telnet, tftp_u, time, tim_i, urh_i, urp_i, uucp, uucp_path, vmnet, whois, X11, Z39_50}
+@attribute Atr-2 {auth, bgp, courier, csnet_ns, ctf, daytime, discard, domain, domain_u, echo, eco_i, ecr_i, efs, exec, finger, ftp, ftp_data, gopher, hostnames, http, http_443, imap4, IRC, iso_tsap, klogin, kshell, ldap, link, login, mtp, name, netbios_dgm, netbios_ns, netbios_ssn, netstat, nnsp, nntp, ntp_u, other, pm_dump,pop_2,pop_3, printer, private, red_i, remote_job, rje, shell, smtp, sql_net, ssh, sunrpc, supdup, systat, telnet, tftp_u, time, tim_i, urh_i, urp_i, uucp, uucp_path, vmnet, whois, X11, Z39_50}
 @attribute Atr-3 {OTH, REJ, RSTO, RSTOS0, RSTR, S0, S1, S2, S3, SF, SH}
 @attribute Atr-4 real [0.0, 6.9337564E8]
 @attribute Atr-5 real [0.0, 5155468.0]

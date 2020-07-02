@@ -1,4 +1,4 @@
-@relation poker-8-9_vs_5
+@relationpoker-8-9_vs_5
 @attribute S1 integer[1,4]
 @attribute C1 integer[1,13]
 @attribute S2 integer[1,4]
@@ -9,7 +9,7 @@
 @attribute C4 integer[1,13]
 @attribute S5 integer[1,4]
 @attribute C5 integer[1,13]
-@attribute Class {positive, negative}
+@attribute Class {positive,negative}
 @data
 1,1,1,7,1,2,1,6,1,5,negative
 4,1,4,7,4,11,4,6,4,3,negative

@@ -4,7 +4,7 @@
 @attribute alm real [0.21, 1.0]
 @attribute mit real [0.0, 1.0]
 @attribute erl real [0.5, 1.0]
-@attribute pox real [0.0, 0.83]
+@attributepox real [0.0, 0.83]
 @attribute vac real [0.13, 0.73]
 @attribute nuc real [0.0, 0.83]
 @attribute class {positive,negative}

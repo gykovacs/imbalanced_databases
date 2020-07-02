@@ -5,7 +5,7 @@
 @attribute White_rook_row {1, 2, 3, 4, 5, 6, 7, 8}
 @attribute Black_king_col {a, b, c, d, e, f, g, h}
 @attribute Black_king_row {1, 2, 3, 4, 5, 6, 7, 8}
-@attribute Class {positive, negative}
+@attribute Class {positive,negative}
 @data
 c,1,c,3,a,2,positive
 c,1,d,3,a,2,positive
