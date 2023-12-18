@@ -1,3 +1,3 @@
 # imbalanced_databases
 
-The package contains the imbalanced databases usually used for testing imbalanced learning solutions, the interface is similar to that of sklearn.databases.
+This repo is not maintained anymore. Please see https://github.com/gykovacs/common_datasets
